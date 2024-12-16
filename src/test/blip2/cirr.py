@@ -91,6 +91,9 @@ class TestCirr:
             tar_feats = torch.stack(list(id2emb.values()), dim=0).to("cpu")
             vl_feats = vl_feats.to("cpu")
 
+            # tar_feats = tar_feats.unsqueeze(1)  # Ajout de cette ligne
+
+
             # sims_q2t = torch.einsum("iqe,jke->ijqk", vl_feats, tar_feats)
             # Process in batches to avoid memory issues
             batch_size = 100
@@ -132,6 +135,12 @@ class TestCirr:
             target_imgs = np.array(list(id2emb.keys()))
 
             assert len(sims_q2t) == len(pair_ids)
+
+
+            ks = [1,5,10,50]
+            correct_counts = {k:0 for k in ks}
+            num_queries = len(pair_ids)
+
             for pair_id, query_sims in zip(pair_ids, sims_q2t):
                 sorted_indices = np.argsort(query_sims)[::-1]
 
@@ -146,9 +155,23 @@ class TestCirr:
                 ][:3]
                 recalls_subset[str(pair_id)] = query_id_recalls_subset
 
+                top_targets = target_imgs[sorted_indices]
+                for k in ks:
+                    if any(m in top_targets[:k] for m in members):
+                        correct_counts[k]+=1 
+
             json_dump(recalls, "recalls_cirr.json")
             json_dump(recalls_subset, "recalls_cirr_subset.json")
 
             print(f"Recalls saved in {Path.cwd()}/recalls_cirr.json")
+
+            recalls_at_k = {f'R@{k}': correct_counts[k]/num_queries for k in ks}
+            json_dump(recalls_at_k, "recalls_cirr_metrics.json")
+
+            print("Recalls for CIRR :")
+            for k in ks:
+                print(f"Recall@{k}: {recalls_at_k[f'R@{k}']*100:.2f}%")
+            print(f"Recalls saved in {Path.cwd()}/recalls_cirr_metrics.json")
+
 
         fabric.barrier()
