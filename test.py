@@ -28,6 +28,7 @@ def main(cfg: DictConfig):
 
         test = instantiate(cfg.test[dataset].test)
         test(model, test_loader, fabric=fabric)
+        
 
 
 if __name__ == "__main__":
