@@ -12,7 +12,8 @@ model:
     lr: 1e-4
 
 trainer:
-  max_epochs: 6
+  # max_epochs: 6
+max_epochs: 1
 
 val: False
 run_name: base
