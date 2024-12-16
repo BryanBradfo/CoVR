@@ -1,0 +1,5 @@
+name: blip2-l-cirr_coco_coir
+
+path: ${paths.work_dir}/outputs/cirr/blip2-coco/blip2-l-coco_coir/tv-False_loss-hnnce_lr-0.0001/base/ckpt_5.ckpt
+
+image_size: 364
